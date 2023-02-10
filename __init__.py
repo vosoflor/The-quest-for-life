@@ -1,1 +1,0 @@
-DATABASE = "data/records.sqlite"
