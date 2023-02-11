@@ -13,6 +13,8 @@ EXPLOSION_SOUND= "sounds/boom.mp3"
 EXPLOSION_IMAGE_SEQUENCE = ["images/explosion1.png", "images/explosion2.png", "images/explosion3.png"]
 FONT = "fonts/SPACE-ARMOR.otf"
 GAME_SOUND = "sounds/space-odyssey.mp3"
+PLANET_IMAGES = "images/planet1.png"
+PLANET_IMAGES_WIDTH = 765
 
 BLANCO = (255, 255, 255)
 VERDE = (0, 128, 94)
