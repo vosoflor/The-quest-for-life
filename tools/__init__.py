@@ -1,5 +1,7 @@
 import pygame
 
+pygame.init()
+
 DATABASE = "data/records.sqlite"
 
 SCREEN_WIDTH = 1280
@@ -12,13 +14,15 @@ OBSTACLES_TYPES_IMAGES = {"asteroid" : "images/asteroid.png", "meteor" : "images
 EXPLOSION_SOUND= "sounds/boom.mp3"
 EXPLOSION_IMAGE_SEQUENCE = ["images/explosion1.png", "images/explosion2.png", "images/explosion3.png"]
 FONT = "fonts/SPACE-ARMOR.otf"
+FONT_20 = pygame.font.Font(FONT, 20)
+FONT_30 = pygame.font.Font(FONT, 30)
+FONT_60 = pygame.font.Font(FONT, 60)
 GAME_SOUND = "sounds/space-odyssey.mp3"
 PLANET_IMAGES = "images/planet1.png"
 PLANET_IMAGES_WIDTH = 765
+GAME_OVER_SOUND = "sounds/pacman-dies.mp3"
 
 BLANCO = (255, 255, 255)
 VERDE = (0, 128, 94)
 ROJO = (255, 0, 0)
 NEGRO = (0, 0, 0)
-
-pygame.init()

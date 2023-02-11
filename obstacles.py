@@ -4,7 +4,7 @@ import pygame
 from tools import OBSTACLES_TYPES_IMAGES, SCREEN_HEIGHT, SCREEN_WIDTH
 
 
-class Obstacles():
+class Obstacles:
 
     def __init__(self, speed):
         obstacles_types = list(OBSTACLES_TYPES_IMAGES)

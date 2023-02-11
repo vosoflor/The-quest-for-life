@@ -1,7 +1,7 @@
 import pygame
 from tools import PLANET_IMAGES_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, SPACESHIP_IMAGE, SPACESHIP_IMAGE_HEIGHT, SPACESHIP_IMAGE_WIDTH
 
-class Spaceship():
+class Spaceship:
 
     def __init__(self, position_y):
 
@@ -18,13 +18,10 @@ class Spaceship():
     def draw(self, surface):
         spaceship = pygame.image.load(self.image_path)
         if self.rotate:
-            if self.rotation_times < 450:
-                rotated_spaceship = pygame.transform.rotate(spaceship, self.rotation_angle * self.rotation_times)
-                surface.blit(rotated_spaceship, (self.position_x, self.position_y))
+            rotated_spaceship = pygame.transform.rotate(spaceship, self.rotation_angle * self.rotation_times)
+            surface.blit(rotated_spaceship, (self.position_x, self.position_y))
+            if self.rotation_times < 450:   
                 self.rotation_times += 1
-            else:
-                rotated_spaceship = pygame.transform.rotate(spaceship, self.rotation_angle * self.rotation_times)
-                surface.blit(rotated_spaceship, (self.position_x, self.position_y))
         else:
             surface.blit(spaceship, (self.position_x, self.position_y))
     
