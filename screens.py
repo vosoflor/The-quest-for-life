@@ -1,5 +1,6 @@
 import random
 import pygame
+from connection import ConnectDatabase
 from objects import Spaceship, Obstacles, Planet
 from tools import *
 
@@ -15,6 +16,8 @@ class Beginning():
         self.sound = pygame.mixer.Sound(BEGINNING_SOUND)
     
     def screen_loop(self):
+        
+        pygame.display.set_caption("Menu: The quest for life :p")
 
         finished = False
 
@@ -54,6 +57,8 @@ class Beginning():
                 self.screen.blit(surface, (420 + (20 * i), 550 + (20 * (i * 2))))
 
             pygame.display.flip()
+        
+        pygame.mixer.init()
 
 class Game:
 
@@ -84,6 +89,8 @@ class Game:
         self.player = True
     
     def start(self):
+
+        pygame.display.set_caption("Game - The quest for life :p")
 
         while not self.game_over and self.player:
 
@@ -290,10 +297,12 @@ class Game_Over():
     # a pantalla principal
     def print_screen(self):
         
+        pygame.display.set_caption("Game Over - The quest for life ;(")
+
         sound_played = False
         game_over_stopwatch = 0
 
-        while game_over_stopwatch < 5000:
+        while game_over_stopwatch < 3000:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -314,3 +323,133 @@ class Game_Over():
             
             game_over_stopwatch += self.clock.get_time()
             self.clock.tick(600)
+    
+class Positions_Table():
+
+    def __init__(self, screen, game) -> None:
+        self.screen = screen
+        self.game = game
+        self.clock = pygame.time.Clock()
+        self.positions_table = []
+    
+    def check_score(self):
+        
+        added = False
+
+        connection = ConnectDatabase("SELECT id, name_initials, score FROM positions_table order by score DESC;")
+        self.positions_table = connection.select_all()
+        input = Name_Initials(self.screen)
+        
+        if len(self.positions_table) < 5:
+            name = input.ask_input()
+            connection = ConnectDatabase("INSERT INTO positions_table (name_initials, score) VALUES(?, ?)", (name, self.game.spaceship.score))
+            connection.insert()
+            added = True
+        else:
+            for record in self.positions_table:
+                if record["score"] < self.game.spaceship.score and not added:
+                    name = input.ask_input()
+                    connection = ConnectDatabase("INSERT INTO positions_table (name_initials, score) VALUES(?, ?)", (name, self.game.spaceship.score))
+                    connection.insert()
+                    added = True
+        
+        connection = ConnectDatabase("SELECT id, name_initials, score FROM positions_table order by score DESC;")
+        self.positions_table = connection.select_all()        
+        
+        if len(self.positions_table) > 5:
+            id = self.positions_table[-1]["id"]
+            self.positions_table.pop(-1)
+            connection = ConnectDatabase(f"DELETE FROM positions_table WHERE id={id}")
+            connection.delete_by()
+    
+    def print(self):
+
+        pygame.display.set_caption("Top 5 !!! - The quest for life :D")
+
+        stopwatch = 0
+
+        while stopwatch < 8000:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    raise SystemExit
+
+            self.screen.fill(NEGRO)
+            
+            text_surface = FONT_60.render("¡ BEST PLAYERS !", True, BLANCO)
+            self.screen.blit(text_surface, (80, 50))
+
+            for index, record in enumerate(self.positions_table):
+
+                rect = pygame.Rect(250, 80 + ((index+1) * 100), 400, 100)
+                pygame.draw.rect(self.screen, BLANCO, rect, 5)
+                text_surface = FONT_60.render(record["name_initials"], True, BLANCO)
+                self.screen.blit(text_surface, (rect.x + 70, rect.y + 10))
+                
+                rect = pygame.Rect(650, 80 + ((index+1) * 100), 400, 100)
+                pygame.draw.rect(self.screen, BLANCO, rect, 5)
+                text_surface = FONT_60.render(str(record["score"]), True, BLANCO)
+                self.screen.blit(text_surface, (rect.x + 120, rect.y + 10))
+
+            pygame.display.flip()
+            
+            self.clock.tick(600)
+
+            stopwatch += self.clock.get_time()
+
+class Name_Initials ():
+
+    def __init__(self, screen) -> None:
+        self.screen = screen
+        self.clock = pygame.time.Clock()
+
+    def ask_input(self):
+        
+        pygame.display.set_caption("Record top 5 - The quest for life :D")
+
+        typing = True
+
+        player_initials = ""
+
+        input_color = pygame.Color("lightskyblue3")
+        input_field = pygame.Rect(500, 400, 300, 100)
+
+        while typing:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    raise SystemExit
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_BACKSPACE:
+                        player_initials = player_initials[:-1]
+                    else:
+                        if len(player_initials) < 3:
+                            player_initials += event.unicode
+            
+            if pygame.key.get_pressed()[pygame.K_c]:
+                typing = False
+
+            self.screen.fill(NEGRO)
+
+            message1 = FONT_60.render("You got in top 5", True, BLANCO)
+            self.screen.blit(message1, (130, 80))
+            message2 = FONT_60.render("type your initials", True, BLANCO)
+            self.screen.blit(message2, (70, 160))
+            message2 = FONT_60.render("and press c", True, BLANCO)
+            self.screen.blit(message2, (240, 240))
+
+            pygame.draw.rect(self.screen, input_color, input_field)
+            text_surface = FONT_60.render(player_initials, True, NEGRO)
+            self.screen.blit(text_surface, (input_field.x + 22, input_field.y + 7))
+            
+            message2 = FONT_60.render("To continue", True, BLANCO)
+            self.screen.blit(message2, (240, 550))
+
+            pygame.display.flip()
+            
+            self.clock.tick(600)    
+        
+        return player_initials
+

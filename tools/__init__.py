@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 
-DATABASE = "data/records.sqlite"
+DATABASE = "data/positions_table.sqlite"
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
