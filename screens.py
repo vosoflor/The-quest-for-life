@@ -1,11 +1,59 @@
 import random
 import pygame
-from obstacles import Obstacles
-from planet import Planet
-from spaceship import Spaceship
+from objects import Spaceship, Obstacles, Planet
+from tools import *
 
-from tools import BLANCO, EXPLOSION_IMAGE_SEQUENCE, EXPLOSION_SOUND, FONT_20, FONT_30, FONT_60, GAME_OVER_SOUND, GAME_SOUND, NEGRO, SCREEN_BACKGROUND, SCREEN_WIDTH, SPACESHIP_IMAGE_HEIGHT, SPACESHIP_IMAGE_WIDTH
 
+class Beginning():
+
+    def __init__(self, screen):
+
+        self.screen = screen
+        self.clock = pygame.time.Clock()
+        self.background_image_path = SCREEN_BACKGROUND_BEGINNING
+        pygame.mixer.init()
+        self.sound = pygame.mixer.Sound(BEGINNING_SOUND)
+    
+    def screen_loop(self):
+
+        finished = False
+
+        while not finished:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    raise SystemExit
+            
+            if pygame.key.get_pressed()[pygame.K_RETURN]:
+                finished = True
+                pygame.mixer.quit()
+                return True
+            
+            pygame.mixer.init()
+            self.sound.play(-1)
+            background = pygame.image.load(self.background_image_path)
+            self.screen.blit(background, (0, 0))
+
+            title = FONT_60.render("THE QUEST FOR LIFE", True, BLANCO)
+            self.screen.blit(title, (15, 100))
+
+            explanation = ["The earth is dying and", "we will go find a new planet", "to survive."]
+            for i, text in enumerate(explanation):
+                surface = FONT_20.render(text, True, BLANCO)
+                self.screen.blit(surface, (100, 260 + (20 * i)))
+            
+            instructions = ["You will need to use the top and down arrows", "in your keyboard to move the spaceship", "and avoid the dangers."]
+            for i, text in enumerate(instructions):
+                surface = FONT_20.render(text, True, BLANCO)
+                self.screen.blit(surface, (200, 400 + (20 * i)))
+    
+            begin = ["Press enter to begin", "this adventure or... :)"]
+            for i, text in enumerate(begin):
+                surface = FONT_30.render(text, True, BLANCO)
+                self.screen.blit(surface, (420 + (20 * i), 550 + (20 * (i * 2))))
+
+            pygame.display.flip()
 
 class Game:
 
@@ -32,10 +80,12 @@ class Game:
         self.level_completed = False
         self.explosion_animation_stopwatch = 0
         self.position_image_sequence = 0
+        self.waiting_time = 0
+        self.player = True
     
     def start(self):
 
-        while not self.game_over:
+        while not self.game_over and self.player:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -66,6 +116,12 @@ class Game:
                         self.next_level_instructions()
                         if pygame.key.get_pressed()[pygame.K_RETURN]:
                             self.init_next_level()
+                        # Si después de un minuto el jugador no continua el juego entonces vuelve
+                        # a pantalla principal
+                        self.waiting_time += self.clock.get_time()
+                        if self.waiting_time > 60000:
+                            self.player = False
+                        
                 else:
                     self.lapse_between_obstacles = 1000 - 100 * (self.level + 1)
                     if self.between_obstacles >= self.lapse_between_obstacles:
@@ -96,9 +152,6 @@ class Game:
             self.clock.tick(600)
 
         pygame.mixer.quit()
-
-        # Utiliza método propio para mostrar pantalla de game over
-        self.game_over_screen()
 
     # Método que inicializa sonido y dibuja pantalla de juego concediendo movimiento a la 
     # imagen de fondo y controlando cuándo se debe detener dicho movimiento
@@ -173,35 +226,6 @@ class Game:
         self.screen.blit(game_info, (1050,60))
         game_info = FONT_20.render(f"Score : {str(self.spaceship.score)}", True, BLANCO)
         self.screen.blit(game_info, (40,20))
-    
-    # Método para mostrar pantalla de game over durante 9 segundos antes de regresar 
-    # a pantalla principal
-    def game_over_screen(self):
-        
-        sound_played = False
-        game_over_stopwatch = 0
-
-        while game_over_stopwatch < 90000:
-            
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    raise SystemExit
-            
-            # Ejecuta sonido de derrota una vez
-            if not sound_played:
-                pygame.mixer.init()
-                pygame.mixer.Sound(GAME_OVER_SOUND).play(0)
-                sound_played = True
-            
-            # Hace render de GAME OVER en pantalla negra
-            self.screen.fill(NEGRO)
-            game_over_message = FONT_60.render("GAME OVER", True, BLANCO)
-            self.screen.blit(game_over_message, (300,300))    
-            pygame.display.flip()
-
-            # Actualiza cronómetro de pantalla game over
-            game_over_stopwatch += self.clock.get_time()
 
     # Método que verifica puntuación obtenida y colisiones con la nave: informa al juego si hubo 
     # colisión, si la nave se quedó sin vidas y ajusta lista de objetos obstáculos eliminando 
@@ -252,4 +276,41 @@ class Game:
         self.level_stopwatch = 0
         self.level_completed = False
         self.explosion_animation_stopwatch = 0
+        self.waiting_time = 0
+        self.player = True
         self.start()
+
+class Game_Over():
+
+    def __init__(self, screen) -> None:
+        self.screen = screen
+        self.clock = pygame.time.Clock()
+
+    # Método para mostrar pantalla de game over durante 9 segundos antes de regresar 
+    # a pantalla principal
+    def print_screen(self):
+        
+        sound_played = False
+        game_over_stopwatch = 0
+
+        while game_over_stopwatch < 5000:
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    raise SystemExit
+            
+            # Ejecuta sonido de derrota una vez
+            if not sound_played:
+                pygame.mixer.init()
+                pygame.mixer.Sound(GAME_OVER_SOUND).play(0)
+                sound_played = True
+            
+            # Hace render de GAME OVER en pantalla negra
+            self.screen.fill(NEGRO)
+            game_over_message = FONT_60.render("GAME OVER", True, BLANCO)
+            self.screen.blit(game_over_message, (300,300))    
+            pygame.display.flip()
+            
+            game_over_stopwatch += self.clock.get_time()
+            self.clock.tick(600)

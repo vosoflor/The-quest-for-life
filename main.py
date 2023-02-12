@@ -1,8 +1,7 @@
 import pygame
-from beginning import Beginning
-from tools import SCREEN_HEIGHT, SCREEN_WIDTH
-from spaceship import Spaceship
-from game import Game
+from screens import Beginning, Game, Game_Over
+from objects import Spaceship
+from tools import *
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -17,3 +16,7 @@ while stay:
         spaceship = Spaceship()
         game = Game(screen, spaceship)
         game.start()
+        if game.game_over:
+            end = Game_Over(screen)
+            end.print_screen()
+        
